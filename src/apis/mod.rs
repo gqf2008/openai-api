@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 pub mod audio;
@@ -49,6 +51,46 @@ pub struct Message {
 impl Clone for Message {
 	fn clone(&self) -> Self {
 		Self { role: self.role.clone(), content: self.content.clone() }
+	}
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ChatMessage {
+	pub role: Role,
+	pub content: Vec<Content>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Content {
+	#[serde(rename = "type")]
+	pub type_: String,
+	#[serde(flatten)]
+	content: serde_json::Value,
+}
+
+impl Content {
+	pub fn with_text<S: ToString>(txt: S) -> Self {
+		let content = serde_json::json!({ "text": {"url": txt.to_string()} });
+		Self { type_: "text".to_string(), content }
+	}
+
+	pub fn with_image<S: ToString>(url: S) -> Self {
+		let base64 = url.to_string();
+		let content = serde_json::json!({ "image_url": {"url":base64} });
+
+		Self { type_: "text".to_string(), content }
+	}
+
+	pub fn with_jpeg(bytes: &[u8]) -> Self {
+		let base64 = format!("data:image/jpeg;base64,{}", base64::encode(bytes));
+		let content = serde_json::json!({ "image_url": {"url":base64} });
+
+		Self { type_: "text".to_string(), content }
+	}
+
+	pub fn with_png(bytes: &[u8]) -> Self {
+		let base64 = format!("data:image/png;base64,{}", base64::encode(bytes));
+		let content = serde_json::json!({ "image_url": {"url":base64} });
+		Self { type_: "text".to_string(), content }
 	}
 }
 

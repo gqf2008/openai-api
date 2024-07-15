@@ -17,7 +17,7 @@ pub struct ChatBody {
 	/// See the model endpoint compatibility table for details on which models work with the Chat API.
 	pub model: String,
 	/// The messages to generate chat completions for, in the chat format.
-	pub messages: Vec<Message>,
+	pub messages: Vec<ChatMessage>,
 	/// What sampling temperature to use, between 0 and 2.
 	/// Higher values like 0.8 will make the output more random,
 	/// while lower values like 0.2 will make it more focused and deterministic.
@@ -95,7 +95,9 @@ impl ChatApi for OpenAI {
 
 #[cfg(test)]
 mod tests {
-	use crate::{apis::chat::ChatBody, openai::new_test_openai, Message, Role};
+	use crate::{
+		apis::chat::ChatBody, openai::new_test_openai, ChatMessage, Content, Message, Role,
+	};
 
 	use super::ChatApi;
 
@@ -114,8 +116,12 @@ mod tests {
 			frequency_penalty: None,
 			logit_bias: None,
 			user: None,
-			messages: vec![Message { role: Role::User, content: "Hello!".to_string() }],
+			messages: vec![ChatMessage {
+				role: Role::User,
+				content: vec![Content::with_text("hello world")],
+			}],
 		};
+
 		let rs = openai.chat_completion_create(&body);
 		let choice = rs.unwrap().choices;
 		let message = &choice[0].message.as_ref().unwrap();
