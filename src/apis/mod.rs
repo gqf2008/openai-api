@@ -102,6 +102,18 @@ pub enum Role {
 	User,
 }
 
+impl<S: AsRef<str>> From<S> for Role {
+	fn from(value: S) -> Self {
+		let str = value.as_ref();
+		match str {
+			"system" | "System" => Role::System,
+			"user" | "User" => Role::User,
+			"Assistant" | "assistant" => Role::Assistant,
+			_ => panic!("Invalid role {str}"),
+		}
+	}
+}
+
 impl Clone for Role {
 	fn clone(&self) -> Self {
 		match self {
